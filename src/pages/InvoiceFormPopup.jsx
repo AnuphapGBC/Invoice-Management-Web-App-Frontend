@@ -15,11 +15,21 @@ const InvoiceFormPopup = ({ invoice, onSave, onClose, receiptTypes }) => {
       currency: '',
       images: [],
       existingImages: [],
+      targetCurrency: '', // Added field for target currency
+      conversionRate: 1, // Added field for conversion rate
+      convertedAmount: '', // Added field for converted amount
     }
   );
 
   const [fullScreenImage, setFullScreenImage] = useState(null);
   const [imageToDelete, setImageToDelete] = useState(null);
+
+  // List of all available currencies
+  const availableCurrencies = [
+    'USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY', 'CHF', 'CNY', 'INR', 'BRL', 'MXN', 'SEK', 
+    'NOK', 'DKK', 'ZAR', 'SGD', 'HKD', 'NZD', 'KRW', 'TRY', 'RUB', 'AED'
+    // Add more currencies if needed
+  ];
 
   useEffect(() => {
     const fetchInvoiceImages = async () => {
@@ -42,6 +52,7 @@ const InvoiceFormPopup = ({ invoice, onSave, onClose, receiptTypes }) => {
     fetchInvoiceImages();
   }, [invoice]);
 
+  // Handle input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
@@ -51,32 +62,47 @@ const InvoiceFormPopup = ({ invoice, onSave, onClose, receiptTypes }) => {
       setFormInvoice({ ...formInvoice, [name]: `${value}:00` });
     } else {
       setFormInvoice({ ...formInvoice, [name]: value });
+
+      // Update converted amount if relevant fields are changed
+      if (name === 'amount' || name === 'conversionRate' || name === 'targetCurrency') {
+        updateConvertedAmount({ ...formInvoice, [name]: value });
+      }
     }
   };
 
+  // Update converted amount whenever amount, conversion rate, or target currency changes
+  const updateConvertedAmount = (updatedInvoice) => {
+    const { amount, conversionRate, targetCurrency } = updatedInvoice;
+    if (amount && conversionRate && targetCurrency) {
+      const convertedAmount = (amount * conversionRate).toFixed(2);
+      setFormInvoice((prev) => ({ ...prev, convertedAmount }));
+    } else {
+      setFormInvoice((prev) => ({ ...prev, convertedAmount: '' }));
+    }
+  };
+
+  // Handle the change in images
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
     setFormInvoice({ ...formInvoice, images: files });
   };
 
+  // Handle removing an existing image
   const handleRemoveExistingImage = (imageUrl) => {
-    // Show confirmation for image deletion
     setImageToDelete(imageUrl);
   };
 
+  // Confirm delete of existing image
   const handleConfirmDeleteImage = async () => {
     if (imageToDelete) {
       try {
-        // Make request to delete image from database and uploads folder
         await axios.delete(`http://localhost:5001/api/invoices/images`, {
           data: { imageUrl: imageToDelete },
         });
-        // Remove image from existing images in state
         setFormInvoice({
           ...formInvoice,
           existingImages: formInvoice.existingImages.filter((img) => img.imageUrl !== imageToDelete),
         });
-        // Reset image to delete
         setImageToDelete(null);
       } catch (error) {
         console.error('Failed to delete image', error);
@@ -84,19 +110,23 @@ const InvoiceFormPopup = ({ invoice, onSave, onClose, receiptTypes }) => {
     }
   };
 
+  // Cancel delete image
   const handleCancelDeleteImage = () => {
     setImageToDelete(null);
   };
 
+  // Handle displaying an image in fullscreen
   const handleImageClick = (imageUrl) => {
     setFullScreenImage(imageUrl);
   };
 
+  // Close fullscreen image view
   const handleCloseFullScreen = (e) => {
     e.stopPropagation(); // Prevent any other click events when closing
     setFullScreenImage(null);
   };
 
+  // Handle form submission
   const handleSubmit = () => {
     onSave(formInvoice);
     alert(invoice ? 'Invoice updated successfully!' : 'Invoice added successfully!');
@@ -161,12 +191,50 @@ const InvoiceFormPopup = ({ invoice, onSave, onClose, receiptTypes }) => {
           value={formInvoice.amount}
           onChange={handleInputChange}
         />
-        <input
-          type="text"
+
+        {/* Dropdown for selecting currency */}
+        <select
           name="currency"
-          placeholder="Currency"
           value={formInvoice.currency}
           onChange={handleInputChange}
+        >
+          <option value="">Select Currency</option>
+          {availableCurrencies.map((currency, index) => (
+            <option key={index} value={currency}>
+              {currency}
+            </option>
+          ))}
+        </select>
+
+        {/* Converting Currency Section */}
+        <select
+          name="targetCurrency"
+          value={formInvoice.targetCurrency}
+          onChange={handleInputChange}
+        >
+          <option value="">Select Target Currency</option>
+          {availableCurrencies.map((currency, index) => (
+            <option key={index} value={currency}>
+              {currency}
+            </option>
+          ))}
+        </select>
+        <input
+          type="number"
+          name="conversionRate"
+          placeholder="Conversion Rate"
+          value={formInvoice.conversionRate}
+          onChange={(e) => {
+            handleInputChange(e);
+            updateConvertedAmount({ ...formInvoice, conversionRate: e.target.value });
+          }}
+        />
+        <input
+          type="text"
+          name="convertedAmount"
+          placeholder="Converted Amount"
+          value={formInvoice.convertedAmount}
+          readOnly
         />
 
         {/* Show Existing Images */}
@@ -182,13 +250,6 @@ const InvoiceFormPopup = ({ invoice, onSave, onClose, receiptTypes }) => {
                     className="invoice-image-thumbnail"
                     onClick={() => handleImageClick(image.imageUrl)}
                   />
-                  {/* <button
-                    type="button"
-                    className="remove-image-button fancy-button"
-                    onClick={() => handleRemoveExistingImage(image.imageUrl)}
-                  >
-                    Remove
-                  </button> */}
                 </div>
               ))}
             </div>
@@ -233,31 +294,6 @@ const InvoiceFormPopup = ({ invoice, onSave, onClose, receiptTypes }) => {
           </div>
         </div>
       )}
-
-      {/* Confirmation Dialog for Image Deletion */}
-      {/* {imageToDelete && (
-        <div className="confirmation-overlay">
-          <div className="confirmation-box">
-            <p>Are you sure you want to delete this image?</p>
-            <div className="confirmation-buttons">
-              <button
-                type="button"
-                className="fancy-button confirm-button"
-                onClick={handleConfirmDeleteImage}
-              >
-                Yes
-              </button>
-              <button
-                type="button"
-                className="fancy-button cancel-button"
-                onClick={handleCancelDeleteImage}
-              >
-                No
-              </button>
-            </div>
-          </div>
-        </div>
-      )} */}
     </div>
   );
 };

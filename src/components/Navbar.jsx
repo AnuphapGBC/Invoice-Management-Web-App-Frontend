@@ -17,7 +17,7 @@ const Navbar = () => {
     window.location.href = '/login';
   };
 
-  console.log("Navbar User Context Value:", user); // Debug log to verify the user
+  // console.log("Navbar User Context Value:", user); // Debug log to verify the user
 
   return (
     <nav className="navbar">

@@ -13,7 +13,7 @@ const LoginPage = ({ setUser }) => {
     try {
       const response = await axios.post('http://localhost:5001/api/login', { username, password });
       if (response.data.success) {
-        console.log("User logged in successfully:", response.data.user); // Debug log for success
+        // console.log("User logged in successfully:", response.data.user); // Debug log for success
         localStorage.setItem('user', JSON.stringify(response.data.user));
         setUser(response.data.user); // Update global state with the user
         navigate('/invoices');

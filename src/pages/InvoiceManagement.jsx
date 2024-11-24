@@ -36,7 +36,8 @@ const InvoiceManagement = () => {
 
     const fetchUserEmail = async () => {
       if (user?.username) {
-        console.log('Fetching email for user:', user.username);
+        // for debuging
+        // console.log('Fetching email for user:', user.username);
         try {
           const response = await axios.get(`http://localhost:5001/api/users/username/${user.username}`);
           if (response.data && response.data.user) {
