@@ -148,18 +148,56 @@ const InvoiceManagement = () => {
         alert('Failed to send email. User email is missing.');
         return;
       }
-
+  
+      // Step 1: Fetch the images for the selected invoice
+      let attachments = [];
+      if (selectedInvoice && selectedInvoice.id) {
+        try {
+          const imagesResponse = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/invoices/${selectedInvoice.id}/images`);
+          
+          console.log('imagesResponse', imagesResponse.data.images);
+          if (imagesResponse.data && Array.isArray(imagesResponse.data.images)) {
+            // Iterate over each imageUrl to fetch the actual image data
+            for (const image of imagesResponse.data.images) {
+              const imageUrl = `${process.env.REACT_APP_API_BASE_URL}/${image.imageUrl}`; // Construct the full image URL
+  
+              // Fetch the image binary data
+              const imageResponse = await axios.get(imageUrl, {
+                responseType: 'arraybuffer', // Expect binary data as response
+              });
+  
+              if (imageResponse.status === 200) {
+                attachments.push({
+                  filename: imageUrl.split('/').pop(), // Extract the filename from the URL
+                  content: Buffer.from(imageResponse.data, 'binary').toString('base64'), // Convert binary to base64
+                  encoding: 'base64',
+                });
+              } else {
+                console.error(`Failed to fetch image from URL: ${imageUrl}`);
+              }
+            }
+          } else {
+            console.error('No images found for this invoice');
+          }
+        } catch (imagesError) {
+          console.error('Failed to fetch images for the invoice', imagesError);
+        }
+      }
+  
+      // Step 2: Prepare email data with attachments
       const emailData = {
         from: userEmail, // Use the fetched email
         to: recipientEmail,
         subject: `Summary Receipt Number (${selectedInvoice.receiptNumber}) and Invoice Number (${selectedInvoice.invoiceNumber})`,
         body: `Here are the details of the invoice:\n\nReceipt Number: ${selectedInvoice.receiptNumber}\nInvoice Number: ${selectedInvoice.invoiceNumber}\nDate: ${selectedInvoice.date}\nTime: ${selectedInvoice.time}\nReceipt Type: ${selectedInvoice.receiptType}\nNarrative: ${selectedInvoice.narrative}\nAmount: ${selectedInvoice.amount}\nCurrency: ${selectedInvoice.currency}`,
-        invoiceId: selectedInvoice.id, // Include the invoice ID for retrieving images
+        invoiceId: selectedInvoice.id, // Include the invoice ID for reference
+        attachments: attachments, // Include the images as attachments
       };
-
+  
       console.log('Sending email with payload:', emailData);
-
-      const response = await axios.post('http://localhost:5001/api/send-mail', emailData);
+  
+      // Step 3: Send the email
+      const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/send-mail`, emailData);
       if (response.data && response.data.success) {
         alert('Email sent successfully!');
         setShowMailPopup(false);
@@ -171,6 +209,7 @@ const InvoiceManagement = () => {
       alert('An error occurred while sending the email.');
     }
   };
+  
 
   return (
     <div className="invoice-container">

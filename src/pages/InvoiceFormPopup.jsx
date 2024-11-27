@@ -35,7 +35,7 @@ const InvoiceFormPopup = ({ invoice, onSave, onClose, receiptTypes }) => {
     const fetchInvoiceImages = async () => {
       if (invoice) {
         try {
-          const response = await axios.get(`http://localhost:5001/api/invoices/${invoice.id}/images`);
+          const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/invoices/${invoice.id}/images`);
           if (response.data && response.data.images) {
             setFormInvoice((prev) => ({
               ...prev,
@@ -96,7 +96,7 @@ const InvoiceFormPopup = ({ invoice, onSave, onClose, receiptTypes }) => {
   const handleConfirmDeleteImage = async () => {
     if (imageToDelete) {
       try {
-        await axios.delete(`http://localhost:5001/api/invoices/images`, {
+        await axios.delete(`${process.env.REACT_APP_API_BASE_URL}/api/invoices/images`, {
           data: { imageUrl: imageToDelete },
         });
         setFormInvoice({
@@ -245,7 +245,7 @@ const InvoiceFormPopup = ({ invoice, onSave, onClose, receiptTypes }) => {
               {formInvoice.existingImages.map((image, index) => (
                 <div key={index} className="existing-image-item">
                   <img
-                    src={`http://localhost:5001/${image.imageUrl}`}
+                    src={`${process.env.REACT_APP_API_BASE_URL}/${image.imageUrl}`}
                     alt={`Invoice ${formInvoice.invoiceNumber} Image ${index + 1}`}
                     className="invoice-image-thumbnail"
                     onClick={() => handleImageClick(image.imageUrl)}
@@ -280,7 +280,7 @@ const InvoiceFormPopup = ({ invoice, onSave, onClose, receiptTypes }) => {
         <div className="full-screen-overlay" onClick={handleCloseFullScreen}>
           <div className="full-screen-image-container">
             <img
-              src={`http://localhost:5001/${fullScreenImage}`}
+              src={`${process.env.REACT_APP_API_BASE_URL}/${fullScreenImage}`}
               alt="Full Screen"
               className="full-screen-image"
             />

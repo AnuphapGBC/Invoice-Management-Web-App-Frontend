@@ -17,7 +17,7 @@ const UserManagement = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axios.get('http://localhost:5001/api/users');
+        const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/users`);
         if (response.data && Array.isArray(response.data.users)) {
           setUsers(response.data.users);
         } else {
@@ -34,7 +34,7 @@ const UserManagement = () => {
 
   const handleAddUser = async () => {
     try {
-      const response = await axios.post('http://localhost:5001/api/users', formValues);
+      const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/users`, formValues);
       if (response.data && response.data.success) {
         alert('User added successfully!');
         window.location.reload();
@@ -58,7 +58,7 @@ const UserManagement = () => {
 
   const handleUpdateUser = async () => {
     try {
-      const response = await axios.put(`http://localhost:5001/api/users/${selectedUser.id}`, formValues);
+      const response = await axios.put(`${process.env.REACT_APP_API_BASE_URL}/api/users/${selectedUser.id}`, formValues);
       if (response.data && response.data.success) {
         alert('User updated successfully!');
         window.location.reload();
@@ -72,7 +72,7 @@ const UserManagement = () => {
     const confirmDelete = window.confirm('Are you sure you want to delete this user?');
     if (confirmDelete) {
       try {
-        const response = await axios.delete(`http://localhost:5001/api/users/${id}`);
+        const response = await axios.delete(`${process.env.REACT_APP_API_BASE_URL}/api/users/${id}`);
         if (response.data && response.data.success) {
           alert('User deleted successfully!');
           window.location.reload();

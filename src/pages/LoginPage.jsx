@@ -11,7 +11,7 @@ const LoginPage = ({ setUser }) => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:5001/api/login', { username, password });
+      const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/login`, { username, password });
       if (response.data.success) {
         // console.log("User logged in successfully:", response.data.user); // Debug log for success
         localStorage.setItem('user', JSON.stringify(response.data.user));
