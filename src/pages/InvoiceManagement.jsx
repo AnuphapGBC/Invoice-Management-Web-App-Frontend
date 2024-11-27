@@ -18,7 +18,7 @@ const InvoiceManagement = () => {
   useEffect(() => {
     const fetchInvoices = async () => {
       try {
-        const response = await axios.get('http://localhost:5001/api/invoices');
+        const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/invoices`);
         if (response.data && Array.isArray(response.data.invoices)) {
           const formattedInvoices = response.data.invoices.map((invoice) => ({
             ...invoice,
@@ -39,7 +39,7 @@ const InvoiceManagement = () => {
         // for debuging
         // console.log('Fetching email for user:', user.username);
         try {
-          const response = await axios.get(`http://localhost:5001/api/users/username/${user.username}`);
+          const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/users/username/${user.username}`);
           if (response.data && response.data.user) {
             setUserEmail(response.data.user.email);
           } else {
@@ -69,7 +69,7 @@ const InvoiceManagement = () => {
       // Add createdBy field with the current user's info
       formData.append('createdBy', user?.username || user?.id || 'Unknown');
 
-      const response = await axios.post('http://localhost:5001/api/invoices', formData, {
+      const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/invoices`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -105,7 +105,7 @@ const InvoiceManagement = () => {
         formData.append('createdBy', user?.username || user?.id || 'Unknown');
       }
 
-      const response = await axios.put(`http://localhost:5001/api/invoices/${updatedInvoice.id}`, formData, {
+      const response = await axios.put(`${process.env.REACT_APP_API_BASE_URL}/api/invoices/${updatedInvoice.id}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -123,7 +123,7 @@ const InvoiceManagement = () => {
     const confirmDelete = window.confirm('Are you sure you want to delete this invoice?');
     if (confirmDelete) {
       try {
-        const response = await axios.delete(`http://localhost:5001/api/invoices/${id}`);
+        const response = await axios.delete(`${process.env.REACT_APP_API_BASE_URL}/api/invoices/${id}`);
         if (response.data && response.data.success) {
           alert('Invoice deleted successfully!');
           window.location.reload();
