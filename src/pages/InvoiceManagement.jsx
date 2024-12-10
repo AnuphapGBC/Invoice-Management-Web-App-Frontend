@@ -3,6 +3,7 @@ import axios from 'axios';
 import { UserContext } from '../context/UserContext';
 import InvoiceFormPopup from './InvoiceFormPopup';
 import './InvoiceManagement.css';
+import { Buffer } from 'buffer';
 
 const InvoiceManagement = () => {
   const [invoices, setInvoices] = useState([]);
@@ -169,9 +170,9 @@ const InvoiceManagement = () => {
               if (imageResponse.status === 200) {
                 attachments.push({
                   filename: imageUrl.split('/').pop(), // Extract the filename from the URL
-                  content: Buffer.from(imageResponse.data, 'binary').toString('base64'), // Convert binary to base64
+                  content: Buffer.from(imageResponse.data, 'binary').toString('base64'), // Convert binary to base64 using the polyfill
                   encoding: 'base64',
-                });
+                });                
               } else {
                 console.error(`Failed to fetch image from URL: ${imageUrl}`);
               }
