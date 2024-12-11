@@ -27,7 +27,7 @@ const InvoiceFormPopup = ({ invoice, onSave, onClose, receiptTypes }) => {
   // List of all available currencies
   const availableCurrencies = [
     'USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY', 'CHF', 'CNY', 'INR', 'BRL', 'MXN', 'SEK', 
-    'NOK', 'DKK', 'ZAR', 'SGD', 'HKD', 'NZD', 'KRW', 'TRY', 'RUB', 'AED'
+    'NOK', 'DKK', 'ZAR', 'SGD', 'HKD', 'NZD', 'KRW', 'TRY', 'RUB', 'AED', 'PHP', 'THB',
     // Add more currencies if needed
   ];
 
