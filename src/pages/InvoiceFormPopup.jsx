@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './InvoiceFormPopup.css';
 
-const InvoiceFormPopup = ({ invoice, onSave, onClose, receiptTypes }) => {
+const InvoiceFormPopup = ({ invoice, onSave, onClose }) => {
   const [formInvoice, setFormInvoice] = useState(
     invoice || {
       invoiceNumber: '',
@@ -21,6 +21,9 @@ const InvoiceFormPopup = ({ invoice, onSave, onClose, receiptTypes }) => {
     }
   );
 
+  const [receiptTypes, setReceiptTypes] = useState([]);
+  const [isLoadingReceiptTypes, setIsLoadingReceiptTypes] = useState(true);
+
   const [fullScreenImage, setFullScreenImage] = useState(null);
   const [imageToDelete, setImageToDelete] = useState(null);
 
@@ -32,6 +35,26 @@ const InvoiceFormPopup = ({ invoice, onSave, onClose, receiptTypes }) => {
   ];
 
   useEffect(() => {
+    // Fetch receipt types
+    const fetchReceiptTypes = async () => {
+      try {
+        const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/invoices/receipt-types`);
+        if (response.data) {
+          setReceiptTypes(response.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch receipt types:', error);
+      } finally {
+        setIsLoadingReceiptTypes(false);
+      }
+    };
+
+    fetchReceiptTypes();
+  }, []); // Only run once on component mount
+
+
+  useEffect(() => {
+    // Fetch invoice images
     const fetchInvoiceImages = async () => {
       if (invoice) {
         try {
@@ -40,7 +63,7 @@ const InvoiceFormPopup = ({ invoice, onSave, onClose, receiptTypes }) => {
             setFormInvoice((prev) => ({
               ...prev,
               existingImages: response.data.images,
-              time: invoice.time ? invoice.time.substring(0, 5) : '', // Set time to `HH:MM` format for editing
+              time: invoice.time ? invoice.time.substring(0, 5) : '',
             }));
           }
         } catch (error) {
@@ -170,8 +193,9 @@ const InvoiceFormPopup = ({ invoice, onSave, onClose, receiptTypes }) => {
           name="receiptType"
           value={formInvoice.receiptType}
           onChange={handleInputChange}
+          disabled={isLoadingReceiptTypes}
         >
-          <option value="">Select Receipt Type</option>
+          <option value="">{isLoadingReceiptTypes ? 'Loading...' : 'Select Receipt Type'}</option>
           {receiptTypes.map((option, index) => (
             <option key={index} value={option}>
               {option}
