@@ -6,22 +6,25 @@ import './Login.css';
 const LoginPage = ({ setUser }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
       const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/login`, { username, password });
+      setLoading(false);
+
       if (response.data.success) {
-        // console.log("User logged in successfully:", response.data.user); // Debug log for success
         localStorage.setItem('user', JSON.stringify(response.data.user));
-        setUser(response.data.user); // Update global state with the user
+        setUser(response.data.user);
         navigate('/invoices');
       } else {
-        alert('Login failed. Please check your credentials.');
+        alert(response.data.message || 'Login failed. Please check your credentials.');
       }
     } catch (error) {
-      console.error('Login Error:', error);
+      setLoading(false);
       alert('Login failed. Please check your credentials.');
     }
   };
@@ -45,7 +48,9 @@ const LoginPage = ({ setUser }) => {
             placeholder="Password" 
             required 
           />
-          <button type="submit">Login</button>
+          <button type="submit" disabled={loading}>
+            {loading ? 'Logging in...' : 'Login'}
+          </button>
         </form>
       </div>
     </div>

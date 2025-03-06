@@ -1,32 +1,68 @@
 /* Navbar.css */
+
 .navbar {
-    background-color: #333;
-    padding: 10px;
+  background-color: #333;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Space links & buttons evenly */
+  flex-wrap: wrap; /* Allow wrapping on small screens */
+  gap: 10px;
+}
+
+.navbar-links {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.navbar-link {
+  color: white;
+  text-decoration: none;
+  font-size: 16px;
+  padding: 8px 12px;  /* Slight padding for better touch */
+  transition: background-color 0.3s;
+  border-radius: 4px;
+}
+
+.navbar-link:hover,
+.navbar-link:focus {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.navbar-button {
+  background-color: #f44336;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-size: 16px;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+  touch-action: manipulation; /* Helps with mobile tap */
+  min-width: 80px; /* Minimum tap target size */
+}
+
+.navbar-button:hover {
+  background-color: #d32f2f;
+}
+
+/* Optional: Make navbar stack vertically on very small screens */
+@media (max-width: 500px) {
+  .navbar {
+      flex-direction: column;
+      align-items: flex-start;
   }
-  
+
   .navbar-links {
-    display: flex;
-    align-items: center;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
   }
-  
-  .navbar-link {
-    color: white;
-    text-decoration: none;
-    margin-right: 15px;
-  }
-  
+
   .navbar-button {
-    background-color: #f44336; /* Red */
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    cursor: pointer;
-    text-decoration: none;
-    font-size: 16px;
-    border-radius: 4px;
-    margin-left: 10px;
+      align-self: flex-start;
+      width: 100%;
   }
-  
-  .navbar-button:hover {
-    background-color: #d32f2f;
-  }
+}

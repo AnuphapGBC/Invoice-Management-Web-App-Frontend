@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import InvoiceManagement from './pages/InvoiceManagement';
 import UserManagement from './pages/UserManagement';
@@ -17,35 +17,46 @@ const App = () => {
     }
   }, []);
 
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    setUser(null);
+  };
+
+  // Dynamically get home page for different roles (optional)
+  const getHomePage = (role) => {
+    switch (role) {
+      case 'admin':
+        return '/users';
+      case 'editor':
+      case 'viewer':
+        return '/invoices';
+      default:
+        return '/';
+    }
+  };
+
   return (
     <UserContext.Provider value={{ user, setUser }}>
       <Router>
-        <Navbar />
+        <Navbar onLogout={handleLogout} />
         <Routes>
-          {/* If user is logged in, navigate to invoices, otherwise to login */}
-          <Route path="/" element={user ? <Navigate to="/invoices" /> : <LoginPage setUser={setUser} />} />
+          <Route path="/" element={user ? <Navigate to={getHomePage(user.role)} /> : <LoginPage setUser={setUser} />} />
+
           <Route
             path="/invoices"
             element={
-              user ? (
-                <PrivateRoute allowedRoles={['admin', 'editor', 'viewer']}>
-                  <InvoiceManagement />
-                </PrivateRoute>
-              ) : (
-                <Navigate to="/" />
-              )
+              <PrivateRoute allowedRoles={['admin', 'editor', 'viewer']}>
+                <InvoiceManagement />
+              </PrivateRoute>
             }
           />
+
           <Route
             path="/users"
             element={
-              user ? (
-                <PrivateRoute allowedRoles={['admin']}>
-                  <UserManagement />
-                </PrivateRoute>
-              ) : (
-                <Navigate to="/" />
-              )
+              <PrivateRoute allowedRoles={['admin']}>
+                <UserManagement />
+              </PrivateRoute>
             }
           />
         </Routes>

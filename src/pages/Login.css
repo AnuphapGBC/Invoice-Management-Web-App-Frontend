@@ -2,61 +2,89 @@
 
 /* Centering the login container */
 .login-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #f4f4f9;
-  }
-  
-  /* Styling the card container */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f4f4f9;
+}
+
+/* Styling the card container */
+.login-card {
+  background-color: #fff;
+  padding: 30px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  text-align: center;
+}
+
+/* Heading style */
+.login-card h2 {
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+/* Styling for input fields */
+.login-card input[type="text"],
+.login-card input[type="password"] {
+  width: 100%;
+  padding: 14px 15px;  /* Slightly larger for better touch targets */
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.login-card input[type="text"]:focus,
+.login-card input[type="password"]:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 4px rgba(0, 123, 255, 0.3);
+  outline: none;
+}
+
+/* Button styling */
+.login-card button {
+  width: 100%;
+  padding: 12px 15px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-top: 10px;
+  touch-action: manipulation; /* Mobile-friendly */
+}
+
+/* Hover state */
+.login-card button:hover {
+  background-color: #0056b3;
+}
+
+/* Disabled button (for loading state) */
+.login-card button:disabled {
+  background-color: #aaa;
+  cursor: not-allowed;
+}
+
+/* Responsive tweaks for smaller screens */
+@media (max-width: 400px) {
   .login-card {
-    background-color: #fff;
-    padding: 30px;
-    width: 100%;
-    max-width: 400px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    border-radius: 8px;
-    text-align: center;
+      padding: 20px;
+      max-width: 90%;
   }
-  
-  /* Heading style */
-  .login-card h2 {
-    font-size: 24px;
-    margin-bottom: 20px;
-    color: #333;
+
+  .login-card input[type="text"],
+  .login-card input[type="password"] {
+      font-size: 14px;
   }
-  
-  /* Styling for input fields */
-  .login-card input[type="text"], .login-card input[type="password"] {
-    width: 100%;
-    padding: 12px 15px;
-    margin: 10px 0;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 16px;
-    transition: border-color 0.3s;
-  }
-  
-  .login-card input[type="text"]:focus, .login-card input[type="password"]:focus {
-    border-color: #007bff;
-    outline: none;
-  }
-  
-  /* Button styling */
+
   .login-card button {
-    width: 100%;
-    padding: 12px 15px;
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    margin-top: 10px;
+      font-size: 14px;
   }
-  
-  .login-card button:hover {
-    background-color: #0056b3;
-  }
+}
