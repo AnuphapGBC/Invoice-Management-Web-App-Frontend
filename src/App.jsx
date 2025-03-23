@@ -22,25 +22,19 @@ const App = () => {
     setUser(null);
   };
 
-  // Dynamically get home page for different roles (optional)
-  const getHomePage = (role) => {
-    switch (role) {
-      case 'admin':
-        return '/users';
-      case 'editor':
-      case 'viewer':
-        return '/invoices';
-      default:
-        return '/';
-    }
-  };
-
   return (
     <UserContext.Provider value={{ user, setUser }}>
       <Router>
         <Navbar onLogout={handleLogout} />
         <Routes>
-          <Route path="/" element={user ? <Navigate to={getHomePage(user.role)} /> : <LoginPage setUser={setUser} />} />
+          <Route
+            path="/"
+            element={
+              user
+                ? <Navigate to="/invoices" />
+                : <LoginPage setUser={setUser} />
+            }
+          />
 
           <Route
             path="/invoices"
