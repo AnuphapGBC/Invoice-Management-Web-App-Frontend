@@ -114,6 +114,10 @@ const InvoiceFormPopup = ({ invoice, onSave, onClose }) => {
     if (files.length === 0) return;
   
     // Optional: Show a temporary "loading" indicator
+    console.log("Selected files:", files);
+    files.forEach((file, i) => {
+      console.log(`📷 File ${i + 1}:`, file.name, file.type, file.size);
+    });
     setFormInvoice((prev) => ({ ...prev, images: files }));
   };
   
@@ -306,12 +310,18 @@ const InvoiceFormPopup = ({ invoice, onSave, onClose }) => {
           type="file"
           name="images"
           multiple
-          onChange={handleImageChange}
           accept="image/*"
+          capture="environment"  // force mobile camera
+          onChange={handleImageChange}
         />
 
+
         <div className="popup-buttons">
-          <button onClick={handleSubmit} className="fancy-button">
+          <button
+            onClick={handleSubmit}
+            className="fancy-button"
+            disabled={formInvoice.images.length === 0}
+          >
             {invoice ? 'Update Invoice' : 'Add Invoice'}
           </button>
           <button onClick={onClose} className="fancy-button cancel-button">
