@@ -105,10 +105,18 @@ const InvoiceFormPopup = ({ invoice, onSave, onClose }) => {
   };
 
   // Handle the change in images
+  // const handleImageChange = (e) => {
+  //   const files = Array.from(e.target.files);
+  //   setFormInvoice({ ...formInvoice, images: files });
+  // };
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
-    setFormInvoice({ ...formInvoice, images: files });
+    if (files.length === 0) return;
+  
+    // Optional: Show a temporary "loading" indicator
+    setFormInvoice((prev) => ({ ...prev, images: files }));
   };
+  
 
   // Handle removing an existing image
   const handleRemoveExistingImage = (imageUrl) => {
@@ -150,12 +158,25 @@ const InvoiceFormPopup = ({ invoice, onSave, onClose }) => {
   };
 
   // Handle form submission
+  // const handleSubmit = () => {
+  //   onSave(formInvoice);
+  //   alert(invoice ? 'Invoice updated successfully!' : 'Invoice added successfully!');
+  //   // Refresh the page after the alert
+  //   window.location.reload();
+  // };
   const handleSubmit = () => {
+    if (formInvoice.images.length === 0 && formInvoice.existingImages.length === 0) {
+      alert('Please upload at least one image before submitting.');
+      return;
+    }
+  
+    console.log("Submitting with images:", formInvoice.images.map(f => f.name));
+  
     onSave(formInvoice);
     alert(invoice ? 'Invoice updated successfully!' : 'Invoice added successfully!');
-    // Refresh the page after the alert
     window.location.reload();
   };
+  
 
   return (
     <div className="popup-overlay fancy-popup">
