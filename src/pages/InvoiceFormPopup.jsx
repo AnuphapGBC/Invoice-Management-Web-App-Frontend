@@ -269,7 +269,7 @@ const InvoiceFormPopup = ({ invoice, onSave, onClose }) => {
               {formInvoice.existingImages.map((image, index) => (
                 <div key={index} className="existing-image-item">
                   <img
-                    src={`${process.env.REACT_APP_API_BASE_URL}/${image.imageUrl}`}
+                    src={`${process.env.REACT_APP_IMAGE_BASE_URL}/${image.imageUrl.split('/').pop()}`}
                     alt={`Invoice ${formInvoice.invoiceNumber} Image ${index + 1}`}
                     className="invoice-image-thumbnail"
                     onClick={() => handleImageClick(image.imageUrl)}
@@ -303,8 +303,8 @@ const InvoiceFormPopup = ({ invoice, onSave, onClose }) => {
       {fullScreenImage && (
         <div className="full-screen-overlay" onClick={handleCloseFullScreen}>
           <div className="full-screen-image-container">
-            <img
-              src={`${process.env.REACT_APP_API_BASE_URL}/${fullScreenImage}`}
+          <img
+              src={`${process.env.REACT_APP_IMAGE_BASE_URL}/${fullScreenImage.split('/').pop()}`}
               alt="Full Screen"
               className="full-screen-image"
             />
