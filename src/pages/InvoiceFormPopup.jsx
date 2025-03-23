@@ -320,7 +320,7 @@ const InvoiceFormPopup = ({ invoice, onSave, onClose }) => {
           <button
             onClick={handleSubmit}
             className="fancy-button"
-            disabled={formInvoice.images.length === 0}
+            disabled={!formInvoice.images || formInvoice.images.length === 0}
           >
             {invoice ? 'Update Invoice' : 'Add Invoice'}
           </button>
