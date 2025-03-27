@@ -5,7 +5,7 @@ import InvoiceManagement from './pages/InvoiceManagement';
 import UserManagement from './pages/UserManagement';
 import PrivateRoute from './components/PrivateRoute';
 import Navbar from './components/Navbar';
-import MobileImageUploadTest from './test/MobileImageUploadTest'; // ✅ Add this import
+import MobileImageUploadTest from './components/MobileImageUploadTest'; // ✅ Add this import
 import { UserContext } from './context/UserContext';
 
 const App = () => {
