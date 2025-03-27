@@ -5,6 +5,7 @@ import InvoiceManagement from './pages/InvoiceManagement';
 import UserManagement from './pages/UserManagement';
 import PrivateRoute from './components/PrivateRoute';
 import Navbar from './components/Navbar';
+import MobileImageUploadTest from './test/MobileImageUploadTest'; // ✅ Add this import
 import { UserContext } from './context/UserContext';
 
 const App = () => {
@@ -52,6 +53,12 @@ const App = () => {
                 <UserManagement />
               </PrivateRoute>
             }
+          />
+
+          {/* ✅ Test route for mobile image upload */}
+          <Route
+            path="/test-upload"
+            element={<MobileImageUploadTest />}
           />
         </Routes>
       </Router>
