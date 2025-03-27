@@ -11,73 +11,61 @@ const InvoiceManagement = () => {
   const [userEmail, setUserEmail] = useState('');
   const [showPopup, setShowPopup] = useState(false);
   const [showMailPopup, setShowMailPopup] = useState(false);
-  const [popupMode, setPopupMode] = useState(''); // 'add', 'edit', 'delete', or 'send'
+  const [popupMode, setPopupMode] = useState(''); // 'add', 'edit', 'send'
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [recipientEmail, setRecipientEmail] = useState('');
   const [receiptTypes] = useState(['Invoice', 'Gas', 'Support Office', 'Other']);
 
   useEffect(() => {
-    const fetchInvoices = async () => {
-      try {
-        const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/invoices`);
-        if (response.data && Array.isArray(response.data.invoices)) {
-          const formattedInvoices = response.data.invoices.map((invoice) => ({
-            ...invoice,
-            date: invoice.date.split('T')[0], // Extract only yyyy-mm-dd from date
-          }));
-          setInvoices(formattedInvoices);
-        } else {
-          console.error('Unexpected response format', response.data);
-          setInvoices([]);
-        }
-      } catch (error) {
-        console.error('Failed to fetch invoices', error);
-      }
-    };
-
-    const fetchUserEmail = async () => {
-      if (user?.username) {
-        // for debuging
-        // console.log('Fetching email for user:', user.username);
-        try {
-          const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/users/username/${user.username}`);
-          if (response.data && response.data.user) {
-            setUserEmail(response.data.user.email);
-          } else {
-            console.error('User email not found');
-          }
-        } catch (error) {
-          console.error('Failed to fetch user email', error);
-        }
-      }
-    };
-
     fetchInvoices();
     fetchUserEmail();
   }, [user]);
 
+  const fetchInvoices = async () => {
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/invoices`);
+      const fetched = response?.data?.invoices ?? [];
+      setInvoices(fetched.map((inv) => ({ ...inv, date: inv.date.split('T')[0] })));
+    } catch (error) {
+      console.error('Failed to fetch invoices', error);
+    }
+  };
+
+  const fetchUserEmail = async () => {
+    try {
+      if (user?.username) {
+        const res = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/users/username/${user.username}`);
+        setUserEmail(res?.data?.user?.email || '');
+      }
+    } catch (error) {
+      console.error('Failed to fetch user email', error);
+    }
+  };
+
+  const buildFormData = (invoice) => {
+    const formData = new FormData();
+    for (const key in invoice) {
+      if (key === 'images' && invoice.images?.length) {
+        invoice.images.forEach((img) => formData.append('images', img));
+      } else {
+        formData.append(key, invoice[key]);
+      }
+    }
+    formData.append('createdBy', user?.username || user?.id || 'Unknown');
+    return formData;
+  };
+
   const handleAddInvoice = async (invoice) => {
     try {
-      const formData = new FormData();
-      for (const key in invoice) {
-        if (key === 'images' && invoice.images.length > 0) {
-          invoice.images.forEach((image) => formData.append('images', image));
-        } else {
-          formData.append(key, invoice[key]);
-        }
-      }
-
-      // Add createdBy field with the current user's info
-      formData.append('createdBy', user?.username || user?.id || 'Unknown');
-
+      const formData = buildFormData(invoice);
       const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/invoices`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
-      if (response.data && response.data.success) {
+
+      if (response.data?.invoiceId) {
         alert('Invoice added successfully!');
-        window.location.reload();
+        fetchInvoices();
+        setShowPopup(false);
       }
     } catch (error) {
       console.error('Failed to add invoice', error);
@@ -90,30 +78,17 @@ const InvoiceManagement = () => {
     setShowPopup(true);
   };
 
-  const handleUpdateInvoice = async (updatedInvoice) => {
+  const handleUpdateInvoice = async (invoice) => {
     try {
-      const formData = new FormData();
-      for (const key in updatedInvoice) {
-        if (key === 'images' && updatedInvoice.images.length > 0) {
-          updatedInvoice.images.forEach((image) => formData.append('images', image));
-        } else {
-          formData.append(key, updatedInvoice[key]);
-        }
-      }
-
-      // Add createdBy field with the current user's info if not already set
-      if (!updatedInvoice.createdBy) {
-        formData.append('createdBy', user?.username || user?.id || 'Unknown');
-      }
-
-      const response = await axios.put(`${process.env.REACT_APP_API_BASE_URL}/api/invoices/${updatedInvoice.id}`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+      const formData = buildFormData(invoice);
+      const response = await axios.put(`${process.env.REACT_APP_API_BASE_URL}/api/invoices/${invoice.id}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
-      if (response.data && response.data.success) {
+
+      if (response.data?.message === 'Invoice updated') {
         alert('Invoice updated successfully!');
-        window.location.reload();
+        fetchInvoices();
+        setShowPopup(false);
       }
     } catch (error) {
       console.error('Failed to update invoice', error);
@@ -121,17 +96,17 @@ const InvoiceManagement = () => {
   };
 
   const handleDeleteInvoice = async (id) => {
-    const confirmDelete = window.confirm('Are you sure you want to delete this invoice?');
-    if (confirmDelete) {
-      try {
-        const response = await axios.delete(`${process.env.REACT_APP_API_BASE_URL}/api/invoices/${id}`);
-        if (response.data && response.data.success) {
-          alert('Invoice deleted successfully!');
-          window.location.reload();
-        }
-      } catch (error) {
-        console.error('Failed to delete invoice', error);
+    const confirmed = window.confirm('Are you sure you want to delete this invoice?');
+    if (!confirmed) return;
+
+    try {
+      const response = await axios.delete(`${process.env.REACT_APP_API_BASE_URL}/api/invoices/${id}`);
+      if (response.data?.message === 'Deleted') {
+        alert('Invoice deleted successfully!');
+        fetchInvoices();
       }
+    } catch (error) {
+      console.error('Failed to delete invoice', error);
     }
   };
 
@@ -142,80 +117,68 @@ const InvoiceManagement = () => {
   };
 
   const handleSendMailSubmit = async () => {
-    console.log('Email from:', userEmail);
+    if (!userEmail) {
+      alert('Cannot send email: user email missing.');
+      return;
+    }
+
     try {
-      if (!userEmail) {
-        console.error('User email is missing. Cannot send email.');
-        alert('Failed to send email. User email is missing.');
-        return;
-      }
-  
-      // Step 1: Fetch the images for the selected invoice
-      let attachments = [];
-      if (selectedInvoice && selectedInvoice.id) {
-        try {
-          const imagesResponse = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/invoices/${selectedInvoice.id}/images`);
-          
-          console.log('imagesResponse', imagesResponse.data.images);
-          if (imagesResponse.data && Array.isArray(imagesResponse.data.images)) {
-            // Iterate over each imageUrl to fetch the actual image data
-            for (const image of imagesResponse.data.images) {
-              const imageUrl = `${process.env.REACT_APP_API_BASE_URL}/${image.imageUrl}`; // Construct the full image URL
-  
-              // Fetch the image binary data
-              const imageResponse = await axios.get(imageUrl, {
-                responseType: 'arraybuffer', // Expect binary data as response
-              });
-  
-              if (imageResponse.status === 200) {
-                attachments.push({
-                  filename: imageUrl.split('/').pop(), // Extract the filename from the URL
-                  content: Buffer.from(imageResponse.data, 'binary').toString('base64'), // Convert binary to base64 using the polyfill
-                  encoding: 'base64',
-                });                
-              } else {
-                console.error(`Failed to fetch image from URL: ${imageUrl}`);
-              }
-            }
-          } else {
-            console.error('No images found for this invoice');
-          }
-        } catch (imagesError) {
-          console.error('Failed to fetch images for the invoice', imagesError);
-        }
-      }
-  
-      // Step 2: Prepare email data with attachments
-      const emailData = {
-        from: userEmail, // Use the fetched email
+      const imagesResponse = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/invoices/${selectedInvoice.id}/images`);
+      const imageList = imagesResponse.data?.images ?? [];
+
+      const attachments = await Promise.all(
+        imageList.map(async (img) => {
+          const url = `${process.env.REACT_APP_API_BASE_URL}/${img.imageUrl}`;
+          const res = await axios.get(url, { responseType: 'arraybuffer' });
+
+          return {
+            filename: url.split('/').pop(),
+            content: Buffer.from(res.data, 'binary').toString('base64'),
+            encoding: 'base64',
+          };
+        })
+      );
+
+      const payload = {
+        from: userEmail,
         to: recipientEmail,
-        subject: `Summary Receipt Number (${selectedInvoice.receiptNumber}) and Invoice Number (${selectedInvoice.invoiceNumber})`,
-        body: `Here are the details of the invoice:\n\nReceipt Number: ${selectedInvoice.receiptNumber}\nInvoice Number: ${selectedInvoice.invoiceNumber}\nDate: ${selectedInvoice.date}\nTime: ${selectedInvoice.time}\nReceipt Type: ${selectedInvoice.receiptType}\nNarrative: ${selectedInvoice.narrative}\nAmount: ${selectedInvoice.amount}\nCurrency: ${selectedInvoice.currency}`,
-        invoiceId: selectedInvoice.id, // Include the invoice ID for reference
-        attachments: attachments, // Include the images as attachments
+        subject: `Invoice #${selectedInvoice.invoiceNumber}`,
+        body: `
+Invoice Details:
+- Receipt #: ${selectedInvoice.receiptNumber}
+- Invoice #: ${selectedInvoice.invoiceNumber}
+- Date: ${selectedInvoice.date}
+- Time: ${selectedInvoice.time}
+- Type: ${selectedInvoice.receiptType}
+- Narrative: ${selectedInvoice.narrative}
+- Amount: ${selectedInvoice.amount} ${selectedInvoice.currency}
+        `,
+        invoiceId: selectedInvoice.id,
+        attachments,
       };
-  
-      console.log('Sending email with payload:', emailData);
-  
-      // Step 3: Send the email
-      const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/send-mail`, emailData);
-      if (response.data && response.data.success) {
+
+      const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/send-mail`, payload);
+      if (response.data?.success) {
         alert('Email sent successfully!');
         setShowMailPopup(false);
       } else {
         alert('Failed to send email.');
       }
-    } catch (error) {
-      console.error('Failed to send email', error);
-      alert('An error occurred while sending the email.');
+    } catch (err) {
+      console.error('Send email failed', err);
+      alert('An error occurred while sending email.');
     }
   };
-  
 
   return (
     <div className="invoice-container">
       <h2>Invoices</h2>
-      <button className="add-invoice-button fancy-button" onClick={() => { setPopupMode('add'); setShowPopup(true); }}>Add Invoice</button>
+      <button className="add-invoice-button fancy-button" onClick={() => {
+        setPopupMode('add');
+        setShowPopup(true);
+      }}>
+        Add Invoice
+      </button>
 
       {showPopup && (
         <InvoiceFormPopup
