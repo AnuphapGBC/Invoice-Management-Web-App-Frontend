@@ -28,7 +28,7 @@ const MobileImageUploadTest = () => {
 
     try {
       const response = await axios.post(
-        `${process.env.REACT_APP_API_BASE_URL}/api/invoices`,
+        `${process.env.REACT_APP_API_BASE_URL}/api/invoices/test-upload`,
         formData,
         {
           headers: {
